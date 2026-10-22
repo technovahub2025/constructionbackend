@@ -1,6 +1,7 @@
 const Measurement = require("../../model/projectengineer/measurementmodel");
 const Labour = require("../../model/projectengineer/labourmodel");
 const Material = require("../../model/projectengineer/materialmodel");
+const Project = require("../../model/projectengineer/projectassignmodel");
 
 const getWorkflowPreview = async (req, res) => {
   try {
@@ -109,7 +110,56 @@ const submitWorkflow = async (req, res) => {
   }
 };
 
+const approveWorkflow = async (req, res) => {
+  try {
+    const { projectId, status } = req.body;
+
+    if (!projectId || !["Accept", "Reject"].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Project ID and status (Accept or Reject) are required",
+      });
+    }
+
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ success: false, message: "Project not found" });
+    }
+
+    const reportQuery = { projectId, status: "submitted" };
+    if (project.siteEngineer) reportQuery.siteEngineer = project.siteEngineer;
+
+    const [measurementCount, labourCount, materialCount] = await Promise.all([
+      Measurement.countDocuments(reportQuery),
+      Labour.countDocuments(reportQuery),
+      Material.countDocuments(reportQuery),
+    ]);
+
+    if (!measurementCount || !labourCount || !materialCount) {
+      return res.status(400).json({
+        success: false,
+        message: "The project needs submitted measurement, labour, and material reports before approval",
+      });
+    }
+
+    const updatedProject = await Project.findByIdAndUpdate(
+      projectId,
+      { $set: { status } },
+      { new: true, runValidators: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: `Workflow ${status.toLowerCase()}ed successfully`,
+      data: updatedProject,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   getWorkflowPreview,
   submitWorkflow,
+  approveWorkflow,
 };

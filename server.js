@@ -39,6 +39,7 @@ const {
 const {
   getWorkflowPreview,
   submitWorkflow,
+  approveWorkflow,
 } = require("./controller/projectengineer/workflowcontroller");
 
 const app = express();
@@ -82,6 +83,7 @@ app.get("/api/getissue", getClientIssues);
 
 app.get("/api/workflowpreview", getWorkflowPreview);
 app.put("/api/submitworkflow", submitWorkflow);
+app.put("/api/approveworkflow", requireProjectManager, approveWorkflow);
 
 // Port from .env
 const PORT = process.env.PORT || 5000;
