@@ -32,17 +32,6 @@ const verifyToken = (token) => {
   }
 };
 
-const estimatorReadPaths = [
-  /^\/api\/estimator\/projects$/,
-  /^\/api\/getprojects$/,
-  /^\/api\/getassignedprojects$/,
-  /^\/api\/getprojectcounts$/,
-  /^\/api\/getlabour$/,
-  /^\/api\/getmaterial$/,
-  /^\/api\/getmeasurement$/,
-  /^\/api\/workflowpreview$/,
-];
-
 const requireAuth = (req, res, next) => {
   const requestPath = req.originalUrl.split("?")[0];
   if (["/api/projectengineerlogin", "/api/siteadminlogin", "/api/estimatorlogin"].includes(requestPath)) {
@@ -57,9 +46,8 @@ const requireAuth = (req, res, next) => {
   }
 
   if (claims.role === "estimator") {
-    const canReadProjectData = req.method === "GET" && estimatorReadPaths.some((path) => path.test(requestPath));
-    if (!canReadProjectData) {
-      return res.status(403).json({ success: false, message: "Estimators have read-only access to project data" });
+    if (req.method !== "GET") {
+      return res.status(403).json({ success: false, message: "Estimators have read-only access" });
     }
   }
 

@@ -51,7 +51,13 @@ const createClientIssue = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "Issue submitted successfully",
-      data: issue,
+      data: {
+        _id: issue._id,
+        issueText: issue.issueText,
+        imageCount: issue.images.length,
+        createdAt: issue.createdAt,
+        updatedAt: issue.updatedAt,
+      },
     });
   } catch (error) {
     return res.status(500).json({
