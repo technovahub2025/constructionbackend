@@ -1,0 +1,45 @@
+const express = require("express");
+const { login } = require("../controller/projectengineer/projectengineer");
+const { createProject, editProject, assignProject, getProjects, getProjectCounts, getAssignedProjects } = require("../controller/projectengineer/projectdata");
+const { createLabour, updateLabour, getLabours } = require("../controller/projectengineer/labourcontroller");
+const { createMaterial, updateMaterial, getMaterials } = require("../controller/projectengineer/materialcontroller");
+const { createMeasurement, updateMeasurement, getMeasurements } = require("../controller/projectengineer/measurementcontroller");
+const { createClientIssue, getClientIssues } = require("../controller/projectengineer/issuecontroller");
+const { sitelogin } = require("../controller/projectengineer/siteengineer");
+const { getWorkflowPreview, submitWorkflow } = require("../controller/projectengineer/workflowcontroller");
+const router = express.Router();
+
+
+router.post("/projectengineerlogin", login);
+
+router.post("/siteadminlogin",sitelogin);
+
+
+router.post("/createproject", createProject);
+router.put("/updateproject/:id", editProject);
+router.put("/assignproject/:id", assignProject);
+router.get("/getprojects",getProjects)
+router.get("/getprojectcounts", getProjectCounts);
+router.get("/getassignedprojects", getAssignedProjects);
+
+router.post("/cretaelabour",createLabour);
+router.put("/updatelabour/:id", updateLabour);
+router.post("/creatematerial",createMaterial);
+router.put("/updatematerial/:id", updateMaterial);
+router.post("/createmaeasurment",createMeasurement);
+router.put("/updatemeasurement/:id", updateMeasurement);
+
+router.post("/submitissue",createClientIssue);
+router.get("/workflowpreview", getWorkflowPreview);
+router.put("/submitworkflow", submitWorkflow);
+
+
+router.get("/getlabour",getLabours);
+router.get("/getmaterial",getMaterials);
+router.get("/getmeasurement",getMeasurements);
+
+router.get("/getissue",getClientIssues);
+
+
+
+module.exports = router;
