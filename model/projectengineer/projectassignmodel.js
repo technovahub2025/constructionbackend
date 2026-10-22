@@ -26,8 +26,10 @@ const projectSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["Hold", "Pending", "Accept", "Reject"],
-      default: "Pending",
+      enum: ["accept", "reject", "hold", "pending"],
+      lowercase: true,
+      trim: true,
+      default: "pending",
     },
     siteEngineer: {
       type: String,

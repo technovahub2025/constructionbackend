@@ -1,6 +1,6 @@
 const Project = require("../../model/projectengineer/projectassignmodel");
 const PROJECT_TYPES = ["commercial", "industrial", "residential", "others"];
-const PROJECT_STATUSES = ["Hold", "Pending", "Accept", "Reject"];
+const PROJECT_STATUSES = ["accept", "reject", "hold", "pending"];
 
 // CREATE PROJECT
 const createProject = async (req, res) => {
@@ -17,7 +17,8 @@ const createProject = async (req, res) => {
     if (!PROJECT_TYPES.includes(String(projectType).toLowerCase())) {
       return res.status(400).json({ success: false, message: `Project type must be one of: ${PROJECT_TYPES.join(", ")}` });
     }
-    if (status && !PROJECT_STATUSES.includes(status)) {
+    const normalizedStatus = status === undefined ? undefined : String(status).toLowerCase();
+    if (normalizedStatus && !PROJECT_STATUSES.includes(normalizedStatus)) {
       return res.status(400).json({ success: false, message: `Project status must be one of: ${PROJECT_STATUSES.join(", ")}` });
     }
 
@@ -26,7 +27,7 @@ const createProject = async (req, res) => {
       title,
       description,
       projectType: String(projectType).toLowerCase(),
-      ...(status ? { status } : {}),
+      ...(normalizedStatus ? { status: normalizedStatus } : {}),
     });
 
     res.status(201).json({
@@ -50,7 +51,8 @@ const editProject = async (req, res) => {
     if (projectType !== undefined && !PROJECT_TYPES.includes(String(projectType).toLowerCase())) {
       return res.status(400).json({ success: false, message: `Project type must be one of: ${PROJECT_TYPES.join(", ")}` });
     }
-    if (status !== undefined && !PROJECT_STATUSES.includes(status)) {
+    const normalizedStatus = status === undefined ? undefined : String(status).toLowerCase();
+    if (normalizedStatus !== undefined && !PROJECT_STATUSES.includes(normalizedStatus)) {
       return res.status(400).json({ success: false, message: `Project status must be one of: ${PROJECT_STATUSES.join(", ")}` });
     }
 
@@ -59,7 +61,7 @@ const editProject = async (req, res) => {
     if (title !== undefined) updates.title = title;
     if (description !== undefined) updates.description = description;
     if (projectType !== undefined) updates.projectType = String(projectType).toLowerCase();
-    if (status !== undefined) updates.status = status;
+    if (normalizedStatus !== undefined) updates.status = normalizedStatus;
 
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({ success: false, message: "Provide at least one project field to update" });

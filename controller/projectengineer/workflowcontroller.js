@@ -114,10 +114,11 @@ const approveWorkflow = async (req, res) => {
   try {
     const { projectId, status } = req.body;
 
-    if (!projectId || !["Accept", "Reject"].includes(status)) {
+    const normalizedStatus = typeof status === "string" ? status.toLowerCase() : "";
+    if (!projectId || !["accept", "reject"].includes(normalizedStatus)) {
       return res.status(400).json({
         success: false,
-        message: "Project ID and status (Accept or Reject) are required",
+        message: "Project ID and status (accept or reject) are required",
       });
     }
 
@@ -144,13 +145,13 @@ const approveWorkflow = async (req, res) => {
 
     const updatedProject = await Project.findByIdAndUpdate(
       projectId,
-      { $set: { status } },
+      { $set: { status: normalizedStatus } },
       { new: true, runValidators: true }
     );
 
     return res.status(200).json({
       success: true,
-      message: `Workflow ${status.toLowerCase()}ed successfully`,
+      message: `Workflow ${normalizedStatus}ed successfully`,
       data: updatedProject,
     });
   } catch (error) {
