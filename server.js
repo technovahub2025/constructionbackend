@@ -5,7 +5,7 @@ const cors = require("cors");
 
 const connectDB = require("./config/db");
 const apiMiddleware = require("./middleware/apiMiddleware");
-const { requireAuth } = require("./middleware/auth");
+const { requireAuth, requireProjectManager } = require("./middleware/auth");
 const { estimatorLogin, getEstimatorProjects } = require("./controller/projectengineer/estimatorcontroller");
 const { login } = require("./controller/projectengineer/projectengineer");
 const { sitelogin } = require("./controller/projectengineer/siteengineer");
@@ -58,9 +58,9 @@ app.post("/api/siteadminlogin", sitelogin);
 app.post("/api/estimatorlogin", estimatorLogin);
 app.get("/api/estimator/projects", getEstimatorProjects);
 
-app.post("/api/createproject", createProject);
-app.put("/api/updateproject/:id", editProject);
-app.put("/api/assignproject/:id", assignProject);
+app.post("/api/createproject", requireProjectManager, createProject);
+app.put("/api/updateproject/:id", requireProjectManager, editProject);
+app.put("/api/assignproject/:id", requireProjectManager, assignProject);
 app.get("/api/getprojects", getProjects);
 app.get("/api/getprojectcounts", getProjectCounts);
 app.get("/api/getassignedprojects", getAssignedProjects);

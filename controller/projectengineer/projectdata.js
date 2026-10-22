@@ -1,21 +1,32 @@
 const Project = require("../../model/projectengineer/projectassignmodel");
+const PROJECT_TYPES = ["commercial", "industrial", "residential", "others"];
+const PROJECT_STATUSES = ["Hold", "Pending", "Accept", "Reject"];
 
 // CREATE PROJECT
 const createProject = async (req, res) => {
   try {
-    const { projectname ,title, description } = req.body;
+    const { projectname, title, description, projectType, status } = req.body;
 
-    if (!projectname || !title || !description) {
+    if (!projectname || !title || !description || !projectType) {
       return res.status(400).json({
         success: false,
-        message: "Project name, title, and description are required",
+        message: "Project name, title, description, and project type are required",
       });
+    }
+
+    if (!PROJECT_TYPES.includes(String(projectType).toLowerCase())) {
+      return res.status(400).json({ success: false, message: `Project type must be one of: ${PROJECT_TYPES.join(", ")}` });
+    }
+    if (status && !PROJECT_STATUSES.includes(status)) {
+      return res.status(400).json({ success: false, message: `Project status must be one of: ${PROJECT_STATUSES.join(", ")}` });
     }
 
     const project = await Project.create({
       projectname,
       title,
       description,
+      projectType: String(projectType).toLowerCase(),
+      ...(status ? { status } : {}),
     });
 
     res.status(201).json({
@@ -35,15 +46,28 @@ const createProject = async (req, res) => {
 const editProject = async (req, res) => {
   try {
     const { id } = req.params;
-    const { projectname ,title, description } = req.body;
+    const { projectname, title, description, projectType, status } = req.body;
+    if (projectType !== undefined && !PROJECT_TYPES.includes(String(projectType).toLowerCase())) {
+      return res.status(400).json({ success: false, message: `Project type must be one of: ${PROJECT_TYPES.join(", ")}` });
+    }
+    if (status !== undefined && !PROJECT_STATUSES.includes(status)) {
+      return res.status(400).json({ success: false, message: `Project status must be one of: ${PROJECT_STATUSES.join(", ")}` });
+    }
+
+    const updates = {};
+    if (projectname !== undefined) updates.projectname = projectname;
+    if (title !== undefined) updates.title = title;
+    if (description !== undefined) updates.description = description;
+    if (projectType !== undefined) updates.projectType = String(projectType).toLowerCase();
+    if (status !== undefined) updates.status = status;
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ success: false, message: "Provide at least one project field to update" });
+    }
 
     const project = await Project.findByIdAndUpdate(
       id,
-      {
-        projectname,
-        title,
-        description,
-      },
+      { $set: updates },
       {
         new: true,
         runValidators: true,

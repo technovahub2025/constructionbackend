@@ -67,4 +67,11 @@ const requireAuth = (req, res, next) => {
   next();
 };
 
-module.exports = { createToken, requireAuth };
+const requireProjectManager = (req, res, next) => {
+  if (req.auth?.role !== "project_manager") {
+    return res.status(403).json({ success: false, message: "Only project managers can manage projects" });
+  }
+  next();
+};
+
+module.exports = { createToken, requireAuth, requireProjectManager };
